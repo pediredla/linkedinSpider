@@ -12,12 +12,12 @@ from selenium import webdriver
 import pymysql
 import unicodedata
 
-controller = Controller.from_port(port=9051)
+#controller = Controller.from_port(port=9051)
 
 
-def newIdentity():
-    controller.authenticate()
-    controller.signal(Signal.NEWNYM)
+#def newIdentity():
+ #   controller.authenticate()
+ #   controller.signal(Signal.NEWNYM)
 
 def FirefoxProfileSettings():
 	profile=webdriver.FirefoxProfile()
@@ -60,6 +60,7 @@ def viewBot(browser):
 	conn = ConnectDatabase()
 	print "database connected"
 	results = []
+	response = True
 	try:
 		with conn.cursor() as cursor:
 			cursor.execute('SELECT DISTINCT * FROM `pea`')
@@ -75,6 +76,21 @@ def viewBot(browser):
 	if results:
 		for result in results:
 			time.sleep(random.uniform(5,10))
+			while response:
+				try:
+					loginpage = browser.find_element_by_id('first-name')
+					if loginpage:
+						print "linkedin people found us I am reloading"
+						# newIdentity()
+						time.sleep(random.uniform(5, 10))
+						viewBot(browser)
+					else:
+						response = False
+
+				except NoSuchElementException as noele:
+					print "good to go!"
+					response = False
+
 			try:
 				firstNameElement = browser.find_element_by_id("firstName")
 				lastNameElement = browser.find_element_by_id("lastName")
@@ -100,7 +116,7 @@ def viewBot(browser):
 								print "check anchors"
 								anchors = element.find_elements_by_xpath('..')
 								for anchor in anchors:
-									print type(result['school'])
+									#print type(result['school'])
 									if normText(result['school']).lower() in normText(anchor.text).lower():
 										print "found the original person"
 										foundLink = anchor.find_element_by_css_selector('a')
@@ -115,6 +131,8 @@ def viewBot(browser):
 				print 'the stacktace is : (%s)' % Noe
 			except StaleElementReferenceException as ele:
 				print "stacktrace is: (%s)" % ele
+				print "I am writing all results to a file"
+				writeTofile(browser.page_source)
 
 def main():
 	browser = webdriver.Firefox(firefox_profile = FirefoxProfileSettings())
@@ -127,7 +145,7 @@ def main():
 			if loginpage:
 				print "Linkedin found us, changing Identity"
 				time.sleep(random.uniform(5,10))
-				newIdentity()
+				#newIdentity()
 				browser.get("https://www.linkedin.com/in/jeffweiner08")
 			else:
 				response = False
