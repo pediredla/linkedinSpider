@@ -53,6 +53,11 @@ def writeTofile(content):
 	file.write(content)
 	file.close()
 
+def appendUrl(url):
+	file = open("urlRepo.txt","a")
+	file.write(url)
+	file.close()
+
 def normText(unicodeText):
 	return unicodedata.normalize('NFKD', unicodeText).encode('ascii','ignore')
 
@@ -126,6 +131,7 @@ def viewBot(browser):
 						foundLink.click()
 					#end of if elements
 				#end of browser
+				appendUrl(normText(browser.current_url))
 				writeTofile(browser.page_source)
 			except NoSuchElementException as Noe:
 				print 'the stacktace is : (%s)' % Noe
