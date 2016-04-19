@@ -28,8 +28,9 @@ def FirefoxProfileSettings():
 	return profile
 
 def ConnectDatabase():
-	conn = pymysql.connect(host='localhost',
+	conn = pymysql.connect(host='ezio.ittc.ku.edu',
 					user = 'root',
+					password = '@anil123!',
 					db='linkedin',
 					charset='utf8mb4',
 					cursorclass=pymysql.cursors.DictCursor)
@@ -45,6 +46,8 @@ def queryTable(table):
 		conn.commit()
 	finally:
 		conn.close()
+
+#do I have to write a function to insert into database
 
 def writeTofile(content):
 	page = BeautifulSoup(content,'html.parser')
