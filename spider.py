@@ -12,7 +12,7 @@ from selenium import webdriver
 import pymysql
 import unicodedata
 
-#controller = Controller.from_port(port=9051)
+controller = Controller.from_port(port=9051)
 
 
 def newIdentity():
