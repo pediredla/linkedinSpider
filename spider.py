@@ -68,7 +68,7 @@ def appendUrl(url):
 def normText(unicodeText):
     return unicodedata.normalize('NFKD', unicodeText).encode('ascii','ignore')
 
-def viewBot(browser):
+def viewBot(browser, pidNumber):
     conn = ConnectDatabase()
     print "database connected"
     results = []
@@ -79,7 +79,7 @@ def viewBot(browser):
     browsers.append(browser)
     try:
         with conn.cursor() as cursor:
-            cursor.execute('SELECT DISTINCT * FROM `pea` where (pid<=887537) GROUP BY pid')
+            cursor.execute('SELECT DISTINCT * FROM `pea` where (pid >%s and pid<=887537) GROUP BY pid',pidNumber)
             results = cursor.fetchall()
 
         conn. commit()
@@ -105,11 +105,11 @@ def viewBot(browser):
                         print "linkedin people found us. I am reloading"
                         newIdentity()
                         browsers.append(webdriver.Firefox(firefox_profile = FirefoxProfileSettings()))
-                        browser[i].close()
+                        browsers[i].close()
                         i = i + 1
                         time.sleep(random.uniform(10, 20))
-                        browser[i].get(url)
-                        viewBot(browsers[i])
+                        browsers[i].get(url)
+                        viewBot(browsers[i], result['pid'])
                     else:
                         response = False
 
@@ -134,6 +134,25 @@ def viewBot(browser):
                 #write logic to check if the page has multiple links
                 if not browser.find_elements_by_class_name('fn'):
                     print "page has results checking headline"
+                    response = True
+                    while response:
+                        try:
+                            if browser.find_element_by_id('first-name') or browser.find_element_by_id(
+                                    'session_key-login'):
+                                print "linkedin people found us. I am reloading"
+                                newIdentity()
+                                browsers.append(webdriver.Firefox(firefox_profile=FirefoxProfileSettings()))
+                                browsers[i].close()
+                                i = i + 1
+                                time.sleep(random.uniform(10, 20))
+                                browsers[i].get(url)
+                                viewBot(browsers[i], result['pid'])
+                            else:
+                                response = False
+
+                        except NoSuchElementException as noele:
+                            print "good to go!"
+                            response = False
                     elements = browser.find_elements_by_class_name('headline')
                     if elements:
                         for element in elements:
@@ -155,7 +174,27 @@ def viewBot(browser):
                             #end of if div
                         #write insert into command here
                         #queryTable(values)
-                        foundLink.click()
+                        browser.get(foundLink.get_attribute("href"))
+                        response = True
+                        while response:
+                            try:
+                                if browser.find_element_by_id('first-name') or browser.find_element_by_id(
+                                        'session_key-login'):
+                                    print "linkedin people found us. I am reloading"
+                                    newIdentity()
+                                    browsers.append(webdriver.Firefox(firefox_profile=FirefoxProfileSettings()))
+                                    browsers[i].close()
+                                    i = i + 1
+                                    time.sleep(random.uniform(10, 20))
+                                    browsers[i].get(foundLink.get_attribute("href"))
+                                    viewBot(browsers[i], result['pid'])
+                                else:
+                                    response = False
+
+                            except NoSuchElementException as noele:
+                                print "good to go!"
+                                response = False
+
                     #end of if elements
                 #end of browser
                 appendUrl(normText(browser.current_url))
@@ -259,7 +298,7 @@ def main():
                 response = False
         except NoSuchElementException:
             response = False
-    viewBot(browser[i])
+    viewBot(browser[i], 1478)
     browser[i].close()
 
 if __name__ == "__main__":
