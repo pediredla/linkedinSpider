@@ -2,8 +2,7 @@ import sys, time, random
 import getpass, urlparse
 import socks, socket
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 from selenium.webdriver.common.keys import Keys
 from stem import Signal
 from stem.control import Controller
@@ -17,19 +16,25 @@ controller = Controller.from_port(port=9051)
 
 def newIdentity():
     controller.authenticate()
-    controller.signal(Signal.NEWNYM)
+    controller.signal(Signal.RELOAD)
 
 def FirefoxProfileSettings():
-    profile=webdriver.FirefoxProfile()
-    profile.set_preference('network.proxy.type', 1)
-    profile.set_preference('network.proxy.socks', '127.0.0.1')
-    profile.set_preference('network.proxy.socks_port', 9050)
+	profile=webdriver.FirefoxProfile()
+	profile.set_preference('network.proxy.type', 1)
+	profile.set_preference('network.proxy.socks', '127.0.0.1')
+	profile.set_preference('network.proxy.socks_port', 9050)
 
-    return profile
+	return profile
+
+def normText(unicodeText):
+	return unicodedata.normalize('NFKD', unicodeText).encode('ascii','ignore')
+
+
 
 def ConnectDatabase():
-    conn = pymysql.connect(host='localhost',
+    conn = pymysql.connect(host='ezio.ittc.ku.edu',
                     user = 'root',
+                    passwd = '@anil123!',
                     db='linkedin',
                     charset='utf8mb4',
                     cursorclass=pymysql.cursors.DictCursor)
@@ -40,7 +45,7 @@ def queryTable(newPerson):
     print newPerson
     try:
         with conn.cursor() as cursor:
-            cursor.execute("INSERT INTO `newData`(`pid`,`first`,`last`,`name`,`cw`,`title`,`affiliation`,`location`,`school`,`degree`,`timeperiod`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",newPerson)
+            cursor.execute("INSERT INTO `newData`(`pid`,`first`,`last`,`name`,`cw`,`title`,`affiliation`,`location`,`industry`,`school`,`degree`,`timeperiod`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",newPerson)
             #result = cursor.fetchone()
 
         conn.commit()
@@ -68,9 +73,13 @@ def viewBot(browser):
     print "database connected"
     results = []
     response = True
+    browsers = []
+    url = browser.current_url
+    i = 0
+    browsers.append(browser)
     try:
         with conn.cursor() as cursor:
-            cursor.execute('SELECT DISTINCT * FROM `pea` GROUP BY pid')
+            cursor.execute('SELECT DISTINCT * FROM `pea` where (pid<=887537) GROUP BY pid')
             results = cursor.fetchall()
 
         conn. commit()
@@ -92,12 +101,15 @@ def viewBot(browser):
 
             while response:
                 try:
-                    loginpage = browser.find_element_by_id('first-name')
-                    if loginpage:
+                    if browser.find_element_by_id('first-name') or browser.find_element_by_id('session_key-login'):
                         print "linkedin people found us. I am reloading"
                         newIdentity()
-                        time.sleep(random.uniform(5, 10))
-                        viewBot(browser)
+                        browsers.append(webdriver.Firefox(firefox_profile = FirefoxProfileSettings()))
+                        browser[i].close()
+                        i = i + 1
+                        time.sleep(random.uniform(10, 20))
+                        browser[i].get(url)
+                        viewBot(browsers[i])
                     else:
                         response = False
 
@@ -159,7 +171,7 @@ def viewBot(browser):
                 values.append(browser.find_element_by_class_name("item-subtitle").text)
                 #if browser.find_element_by_class_name("locality"):
                     #location
-                #values.append(browser.find_element_by_class_name("locality").text)
+                values.append(browser.find_element_by_class_name("locality").text)
                 #if browser.find_element_by_class_name("descriptor"):
                     #industry
                 values.append(browser.find_element_by_class_name("descriptor").text)
@@ -226,24 +238,29 @@ def viewBot(browser):
                 writeTofile(browser.page_source)
 
 def main():
-    browser = webdriver.Firefox(firefox_profile = FirefoxProfileSettings())
-    browser.get("https://www.linkedin.com/in/jeffweiner08")
+    browser = []
+    browser.append(webdriver.Firefox(firefox_profile = FirefoxProfileSettings()))
+    browser[0].get("https://www.linkedin.com/in/jeffweiner08")
     response = True
+    i = 0
     #loginpage = browser.find_element_by_id('first-name')
     while response:
         try:
-            loginpage = browser.find_element_by_id('first-name')
-            if loginpage:
+            loginpage = browser[i].find_element_by_id('first-name')
+            if loginpage or browser[i].find_element_by_id('session_key-login'):
                 print "Linkedin found us, changing Identity"
-                time.sleep(random.uniform(5,10))
-                #newIdentity()
-                browser.get("https://www.linkedin.com/in/jeffweiner08")
+                time.sleep(random.uniform(10,20))
+                newIdentity()
+                browser.append(webdriver.Firefox(firefox_profile = FirefoxProfileSettings()))
+                browser[i].close()
+                i = i + 1
+                browser[i].get("https://www.linkedin.com/in/jeffweiner08")
             else:
                 response = False
         except NoSuchElementException:
             response = False
-    viewBot(browser)
-    browser.close()
+    viewBot(browser[i])
+    browser[i].close()
 
 if __name__ == "__main__":
     main()
