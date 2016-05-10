@@ -34,7 +34,7 @@ def normText(unicodeText):
 def ConnectDatabase():
     conn = pymysql.connect(host='**********',
                     user = 'root',
-                    passwd = '@@@@@@@@@@@@!',
+                    passwd = '*********',
                     db='linkedin',
                     charset='utf8mb4',
                     cursorclass=pymysql.cursors.DictCursor)
@@ -174,7 +174,13 @@ def viewBot(browser, pidNumber):
                             #end of if div
                         #write insert into command here
                         #queryTable(values)
-                        browser.get(foundLink.get_attribute("href"))
+                        try:
+                            browser.get(foundLink.get_attribute("href"))
+                        except AttributeError as AttrErr:
+                            print "i am writing all to file"
+                            writeTofile(browser.page_source)
+                            browser.get("https://www.linkedin.com/in/jeffweiner08")
+                            viewBot(browser, result['pid']+1)
                         response = True
                         while response:
                             try:
