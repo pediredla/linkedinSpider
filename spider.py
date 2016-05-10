@@ -74,7 +74,7 @@ def viewBot(browser, pidNumber):
     results = []
     response = True
     browsers = []
-    url = browser.current_url
+    #url = browser.current_url
     i = 0
     browsers.append(browser)
     try:
@@ -108,7 +108,7 @@ def viewBot(browser, pidNumber):
                         browsers[i].close()
                         i = i + 1
                         time.sleep(random.uniform(10, 20))
-                        browsers[i].get(url)
+                        browsers[i].get("https://www.linkedin.com/in/jeffweiner08")
                         viewBot(browsers[i], result['pid'])
                     else:
                         response = False
@@ -145,7 +145,7 @@ def viewBot(browser, pidNumber):
                                 browsers[i].close()
                                 i = i + 1
                                 time.sleep(random.uniform(10, 20))
-                                browsers[i].get(url)
+                                browsers[i].get("https://www.linkedin.com/in/jeffweiner08")
                                 viewBot(browsers[i], result['pid'])
                             else:
                                 response = False
@@ -192,7 +192,7 @@ def viewBot(browser, pidNumber):
                                     browsers[i].close()
                                     i = i + 1
                                     time.sleep(random.uniform(10, 20))
-                                    browsers[i].get(foundLink.get_attribute("href"))
+                                    browsers[i].get("https://www.linkedin.com/in/jeffweiner08")
                                     viewBot(browsers[i], result['pid'])
                                 else:
                                     response = False
