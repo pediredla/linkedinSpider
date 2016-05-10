@@ -32,9 +32,9 @@ def normText(unicodeText):
 
 
 def ConnectDatabase():
-    conn = pymysql.connect(host='ezio.ittc.ku.edu',
+    conn = pymysql.connect(host='**********',
                     user = 'root',
-                    passwd = '@anil123!',
+                    passwd = '@@@@@@@@@@@@!',
                     db='linkedin',
                     charset='utf8mb4',
                     cursorclass=pymysql.cursors.DictCursor)
