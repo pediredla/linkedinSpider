@@ -108,8 +108,10 @@ def viewBot(browser, pidNumber):
                         browsers[i].close()
                         i = i + 1
                         time.sleep(random.uniform(10, 20))
-                        browsers[i].get("https://www.linkedin.com/in/jeffweiner08")
-                        viewBot(browsers[i], result['pid'])
+                        newBrowser = browsers[i]
+                        releaseList(browsers)
+                        newBrowser.get("https://www.linkedin.com/in/jeffweiner08")
+                        viewBot(newBrowser, result['pid'])
                     else:
                         response = False
 
@@ -145,8 +147,10 @@ def viewBot(browser, pidNumber):
                                 browsers[i].close()
                                 i = i + 1
                                 time.sleep(random.uniform(10, 20))
-                                browsers[i].get("https://www.linkedin.com/in/jeffweiner08")
-                                viewBot(browsers[i], result['pid'])
+                                newBrowser = browsers[i]
+                                releaseList(browsers)
+                                newBrowser.get("https://www.linkedin.com/in/jeffweiner08")
+                                viewBot(newBrowser, result['pid'])
                             else:
                                 response = False
 
@@ -192,8 +196,10 @@ def viewBot(browser, pidNumber):
                                     browsers[i].close()
                                     i = i + 1
                                     time.sleep(random.uniform(10, 20))
-                                    browsers[i].get("https://www.linkedin.com/in/jeffweiner08")
-                                    viewBot(browsers[i], result['pid'])
+                                    newBrowser = browsers[i]
+                                    releaseList(browsers)
+                                    newBrowser.get("https://www.linkedin.com/in/jeffweiner08")
+                                    viewBot(newBrowser, result['pid'])
                                 else:
                                     response = False
 
@@ -304,8 +310,10 @@ def main():
                 response = False
         except NoSuchElementException:
             response = False
-    viewBot(browser[i], 1478)
-    browser[i].close()
+    newBrowser = browser[i]
+    releaseList(browser)
+    viewBot(newBrowser, 1478)
+    newBrowser.close()
 
 if __name__ == "__main__":
     main()
