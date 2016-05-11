@@ -1,17 +1,21 @@
-import sys, time, random
-import getpass, urlparse
-import socks, socket
-from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
-from selenium.webdriver.common.keys import Keys
-from stem import Signal
-from stem.control import Controller
-from bs4 import BeautifulSoup
-from selenium import webdriver
-import pymysql
+import gc
+import random
+import time
 import unicodedata
 
+import psutil
+import pymysql
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
+from stem import Signal
+from stem.control import Controller
+
 controller = Controller.from_port(port=9051)
+
+def releaseList(a):
+    del a[:]
+    del a
 
 
 def newIdentity():
@@ -32,9 +36,9 @@ def normText(unicodeText):
 
 
 def ConnectDatabase():
-    conn = pymysql.connect(host='**********',
+    conn = pymysql.connect(host='*******',
                     user = 'root',
-                    passwd = '*********',
+                    passwd = '@@@@@@@@@',
                     db='linkedin',
                     charset='utf8mb4',
                     cursorclass=pymysql.cursors.DictCursor)
@@ -105,12 +109,15 @@ def viewBot(browser, pidNumber):
                         print "linkedin people found us. I am reloading"
                         newIdentity()
                         browsers.append(webdriver.Firefox(firefox_profile = FirefoxProfileSettings()))
-                        browsers[i].close()
+                        p = psutil.process(browsers[i].binary.process.pid)
+                        p.terminate
+                        browsers[i].quit()
                         i = i + 1
                         time.sleep(random.uniform(10, 20))
                         newBrowser = browsers[i]
                         releaseList(browsers)
                         newBrowser.get("https://www.linkedin.com/in/jeffweiner08")
+                        gc.collect()
                         viewBot(newBrowser, result['pid'])
                     else:
                         response = False
@@ -144,12 +151,15 @@ def viewBot(browser, pidNumber):
                                 print "linkedin people found us. I am reloading"
                                 newIdentity()
                                 browsers.append(webdriver.Firefox(firefox_profile=FirefoxProfileSettings()))
-                                browsers[i].close()
+                                p = psutil.process(browsers[i].binary.process.pid)
+                                p.terminate
+                                browsers[i].quit()
                                 i = i + 1
                                 time.sleep(random.uniform(10, 20))
                                 newBrowser = browsers[i]
                                 releaseList(browsers)
                                 newBrowser.get("https://www.linkedin.com/in/jeffweiner08")
+                                gc.collect()
                                 viewBot(newBrowser, result['pid'])
                             else:
                                 response = False
@@ -193,12 +203,15 @@ def viewBot(browser, pidNumber):
                                     print "linkedin people found us. I am reloading"
                                     newIdentity()
                                     browsers.append(webdriver.Firefox(firefox_profile=FirefoxProfileSettings()))
-                                    browsers[i].close()
+                                    p = psutil.process(browsers[i].binary.process.pid)
+                                    p.terminate
+                                    browsers[i].quit()
                                     i = i + 1
                                     time.sleep(random.uniform(10, 20))
                                     newBrowser = browsers[i]
                                     releaseList(browsers)
                                     newBrowser.get("https://www.linkedin.com/in/jeffweiner08")
+                                    gc.collect()
                                     viewBot(newBrowser, result['pid'])
                                 else:
                                     response = False
@@ -282,6 +295,32 @@ def viewBot(browser, pidNumber):
 
                 writeTofile(browser.page_source)
             except NoSuchElementException as Noe:
+                if "firstName" in Noe.msg:
+                    print "it's a trap change the id"
+                    response = True
+                    while response:
+                        try:
+                            if browser.find_element_by_id('first-name') or browser.find_element_by_id(
+                                    'session_key-login'):
+                                print "linkedin people found us. I am reloading"
+                                newIdentity()
+                                browsers.append(webdriver.Firefox(firefox_profile=FirefoxProfileSettings()))
+                                p = psutil.process(browsers[i].binary.process.pid)
+                                p.terminate
+                                browsers[i].quit()
+                                i = i + 1
+                                time.sleep(random.uniform(10, 20))
+                                newBrowser = browsers[i]
+                                releaseList(browsers)
+                                newBrowser.get("https://www.linkedin.com/in/jeffweiner08")
+                                gc.collect()
+                                viewBot(newBrowser, result['pid'])
+                            else:
+                                response = False
+                        except NoSuchElementException as elenot:
+                            print "good to go!"
+                            response = False
+
                 print 'the stacktace is : (%s)' % Noe
             except StaleElementReferenceException as ele:
                 print "stacktrace is: (%s)" % ele
@@ -303,7 +342,9 @@ def main():
                 time.sleep(random.uniform(10,20))
                 newIdentity()
                 browser.append(webdriver.Firefox(firefox_profile = FirefoxProfileSettings()))
-                browser[i].close()
+                p = psutil.process(browser[i].binary.process.pid)
+                p.terminate
+                browser[i].quit()
                 i = i + 1
                 browser[i].get("https://www.linkedin.com/in/jeffweiner08")
             else:
@@ -312,8 +353,9 @@ def main():
             response = False
     newBrowser = browser[i]
     releaseList(browser)
+    gc.collect()
     viewBot(newBrowser, 1478)
-    newBrowser.close()
+    newBrowser.quit()
 
 if __name__ == "__main__":
     main()
