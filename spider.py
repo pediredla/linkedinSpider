@@ -1,6 +1,6 @@
 import gc
 import random
-import time
+import time, os, signal
 import unicodedata
 
 import psutil
@@ -36,9 +36,9 @@ def normText(unicodeText):
 
 
 def ConnectDatabase():
-    conn = pymysql.connect(host='*******',
+    conn = pymysql.connect(host='ezio.ittc.ku.edu',
                     user = 'root',
-                    passwd = '@@@@@@@@@',
+                    passwd = '@anil123!',
                     db='linkedin',
                     charset='utf8mb4',
                     cursorclass=pymysql.cursors.DictCursor)
@@ -59,7 +59,7 @@ def queryTable(newPerson):
 
 def writeTofile(content):
     page = BeautifulSoup(content,'html.parser')
-    file = open(page.title.string+".html","w")
+    file = open(normText(page.title.string).replace(" ", "").replace("|","")+".html","w")
     content = normText(page.prettify())
     file.write(content)
     file.close()
@@ -83,7 +83,7 @@ def viewBot(browser, pidNumber):
     browsers.append(browser)
     try:
         with conn.cursor() as cursor:
-            cursor.execute('SELECT DISTINCT * FROM `pea` where (pid >%s and pid<=887537) GROUP BY pid',pidNumber)
+            cursor.execute('SELECT DISTINCT * FROM `pea` where (pid >%s and pid<=2504278) GROUP BY pid',pidNumber)
             results = cursor.fetchall()
 
         conn. commit()
@@ -109,7 +109,7 @@ def viewBot(browser, pidNumber):
                         print "linkedin people found us. I am reloading"
                         newIdentity()
                         browsers.append(webdriver.Firefox(firefox_profile = FirefoxProfileSettings()))
-                        p = psutil.process(browsers[i].binary.process.pid)
+                        p = psutil.Process(browsers[i].binary.process.pid)
                         p.terminate
                         browsers[i].quit()
                         i = i + 1
@@ -135,66 +135,16 @@ def viewBot(browser, pidNumber):
                 firstNameElement.send_keys(result['first'])
                 lastNameElement.submit()
 
-            #os.system('clear')
-                count = count -1
-                print "[+] Sucess, bot will start crawling"
-                print str(count)+" remaining"
-                #download the html source
-                #write logic to check if the page has multiple links
-                if not browser.find_elements_by_class_name('fn'):
-                    print "page has results checking headline"
-                    response = True
-                    while response:
-                        try:
-                            if browser.find_element_by_id('first-name') or browser.find_element_by_id(
-                                    'session_key-login'):
-                                print "linkedin people found us. I am reloading"
-                                newIdentity()
-                                browsers.append(webdriver.Firefox(firefox_profile=FirefoxProfileSettings()))
-                                p = psutil.process(browsers[i].binary.process.pid)
-                                p.terminate
-                                browsers[i].quit()
-                                i = i + 1
-                                time.sleep(random.uniform(10, 20))
-                                newBrowser = browsers[i]
-                                releaseList(browsers)
-                                newBrowser.get("https://www.linkedin.com/in/jeffweiner08")
-                                gc.collect()
-                                viewBot(newBrowser, result['pid'])
-                            else:
-                                response = False
+                if(firstNameElement):
 
-                        except NoSuchElementException as noele:
-                            print "good to go!"
-                            response = False
-                    elements = browser.find_elements_by_class_name('headline')
-                    if elements:
-                        for element in elements:
-                            div = element.find_elements_by_xpath("//*[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'"+result['school']+"')]")
-                            div2 = element.find_elements_by_xpath("//*[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'"+result['cw']+"')]")
-                            div3 = element.find_elements_by_xpath(
-                                "//*[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'" +
-                                result['affiliation'] + "')]")
-                            if div or div2 or div3:
-                                print "check anchors"
-                                anchors = element.find_elements_by_xpath('..')
-                                for anchor in anchors:
-                                    #print type(result['school'])
-                                    if (normText(result['school']).lower() in normText(anchor.text).lower()) or(normText(result['affiliation']).lower() in normText(anchor.text).lower()) or (normText(result['cw']).lower() in normText(anchor.text).lower()):
-                                        print "found the original person"
-                                        foundLink = anchor.find_element_by_css_selector('a')
-                                        #writeTofile(browser.page_source)
-                                    #end of if results
-                            #end of if div
-                        #write insert into command here
-                        #queryTable(values)
-                        try:
-                            browser.get(foundLink.get_attribute("href"))
-                        except AttributeError as AttrErr:
-                            print "i am writing all to file"
-                            writeTofile(browser.page_source)
-                            browser.get("https://www.linkedin.com/in/jeffweiner08")
-                            viewBot(browser, result['pid']+1)
+            #os.system('clear')
+                    count = count -1
+                    print "[+] Sucess, bot will start crawling"
+                    print str(count)+" remaining"
+                    #download the html source
+                    #write logic to check if the page has multiple links
+                    if not browser.find_elements_by_class_name('fn'):
+                        print "page has results checking headline"
                         response = True
                         while response:
                             try:
@@ -203,7 +153,7 @@ def viewBot(browser, pidNumber):
                                     print "linkedin people found us. I am reloading"
                                     newIdentity()
                                     browsers.append(webdriver.Firefox(firefox_profile=FirefoxProfileSettings()))
-                                    p = psutil.process(browsers[i].binary.process.pid)
+                                    p = psutil.Process(browsers[i].binary.process.pid)
                                     p.terminate
                                     browsers[i].quit()
                                     i = i + 1
@@ -219,84 +169,135 @@ def viewBot(browser, pidNumber):
                             except NoSuchElementException as noele:
                                 print "good to go!"
                                 response = False
+                        elements = browser.find_elements_by_class_name('headline')
+                        if elements:
+                            for element in elements:
+                                div = element.find_elements_by_xpath("//*[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'"+result['school']+"')]")
+                                div2 = element.find_elements_by_xpath("//*[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'"+result['cw']+"')]")
+                                div3 = element.find_elements_by_xpath(
+                                    "//*[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'" +
+                                    result['affiliation'] + "')]")
+                                if div or div2 or div3:
+                                    print "check anchors"
+                                    anchors = element.find_elements_by_xpath('..')
+                                    for anchor in anchors:
+                                        #print type(result['school'])
+                                        if (normText(result['school']).lower() in normText(anchor.text).lower()) or(normText(result['affiliation']).lower() in normText(anchor.text).lower()) or (normText(result['cw']).lower() in normText(anchor.text).lower()):
+                                            print "found the original person"
+                                            foundLink = anchor.find_element_by_css_selector('a')
+                                            #writeTofile(browser.page_source)
+                                        #end of if results
+                                #end of if div
+                            #write insert into command here
+                            #queryTable(values)
+                            try:
+                                browser.get(foundLink.get_attribute("href"))
+                            except AttributeError as AttrErr:
+                                print "i am writing all to file"
+                                writeTofile(browser.page_source)
+                                browser.get("https://www.linkedin.com/in/jeffweiner08")
+                                viewBot(browser, result['pid']+1)
+                            response = True
+                            while response:
+                                try:
+                                    if browser.find_element_by_id('first-name') or browser.find_element_by_id(
+                                            'session_key-login'):
+                                        print "linkedin people found us. I am reloading"
+                                        newIdentity()
+                                        browsers.append(webdriver.Firefox(firefox_profile=FirefoxProfileSettings()))
+                                        p = psutil.Process(browsers[i].binary.process.pid)
+                                        p.terminate
+                                        browsers[i].quit()
+                                        i = i + 1
+                                        time.sleep(random.uniform(10, 20))
+                                        newBrowser = browsers[i]
+                                        releaseList(browsers)
+                                        newBrowser.get("https://www.linkedin.com/in/jeffweiner08")
+                                        gc.collect()
+                                        viewBot(newBrowser, result['pid'])
+                                    else:
+                                        response = False
 
-                    #end of if elements
-                #end of browser
-                appendUrl(normText(browser.current_url))
-                #insert into database here
-                #if browser.find_element_by_xpath('//p[@data-section="headline"]'):
-                    #cw
-                values.append(browser.find_element_by_xpath('//p[@data-section="headline"]').text)
-                #if browser.find_element_by_class_name("item-title"):
-                    #title
-                values.append(browser.find_element_by_class_name("item-title").text)
-                #if browser.find_element_by_class_name("item-subtitle"):
-                    #affiliation
-                values.append(browser.find_element_by_class_name("item-subtitle").text)
-                #if browser.find_element_by_class_name("locality"):
-                    #location
-                values.append(browser.find_element_by_class_name("locality").text)
-                #if browser.find_element_by_class_name("descriptor"):
-                    #industry
-                values.append(browser.find_element_by_class_name("descriptor").text)
+                                except NoSuchElementException as noele:
+                                    print "good to go!"
+                                    response = False
 
-                values.append(school)
-                values.append(degree)
-                values.append(timeperiod)
-                if browser.find_elements_by_id("education"):
-                    education = browser.find_elements_by_id("education")
-                    if type(education) is list:
-                        for edu in education:
-                            values.remove(school)
-                            values.remove(degree)
-                            values.remove(timeperiod)
+                        #end of if elements
+                    #end of browser
+                    appendUrl(normText(browser.current_url))
+                    #insert into database here
+                    #if browser.find_element_by_xpath('//p[@data-section="headline"]'):
+                        #cw
+                    values.append(browser.find_element_by_xpath('//p[@data-section="headline"]').text)
+                    #if browser.find_element_by_class_name("item-title"):
+                        #title
+                    values.append(browser.find_element_by_class_name("item-title").text)
+                    #if browser.find_element_by_class_name("item-subtitle"):
+                        #affiliation
+                    values.append(browser.find_element_by_class_name("item-subtitle").text)
+                    #if browser.find_element_by_class_name("locality"):
+                        #location
+                    values.append(browser.find_element_by_class_name("locality").text)
+                    #if browser.find_element_by_class_name("descriptor"):
+                        #industry
+                    values.append(browser.find_element_by_class_name("descriptor").text)
 
-                            if edu.find_element_by_class_name("item-title") is list:
-                                for sch in edu.find_element_by_class_name("item-title"):
-                                    school = sch.text
-                            else:
-                                school = edu.find_element_by_class_name("item-title").text
-                            if edu.find_element_by_class_name("item-subtitle") is list:
-                                for deg in edu.find_element_by_class_name("item-subtitle"):
-                                    degree = deg.text
-                            else:
-                                degree = edu.find_element_by_class_name("item-subtitle").text
-                            if edu.find_element_by_class_name("date-range") is list:
-                                for ti in edu.find_element_by_class_name("date-range"):
-                                    timeperiod = ti.text
-                            else:
-                                timeperiod = edu.find_element_by_class_name("date-range").text
+                    values.append(school)
+                    values.append(degree)
+                    values.append(timeperiod)
+                    if browser.find_elements_by_id("education"):
+                        education = browser.find_elements_by_id("education")
+                        if type(education) is list:
+                            for edu in education:
+                                values.remove(school)
+                                values.remove(degree)
+                                values.remove(timeperiod)
 
-                            values.append(school)
-                            values.append(degree)
-                            values.append(timeperiod)
-                            print tuple(values)
+                                if edu.find_element_by_class_name("item-title") is list:
+                                    for sch in edu.find_element_by_class_name("item-title"):
+                                        school = sch.text
+                                else:
+                                    school = edu.find_element_by_class_name("item-title").text
+                                if edu.find_element_by_class_name("item-subtitle") is list:
+                                    for deg in edu.find_element_by_class_name("item-subtitle"):
+                                        degree = deg.text
+                                else:
+                                    degree = edu.find_element_by_class_name("item-subtitle").text
+                                if edu.find_element_by_class_name("date-range") is list:
+                                    for ti in edu.find_element_by_class_name("date-range"):
+                                        timeperiod = ti.text
+                                else:
+                                    timeperiod = edu.find_element_by_class_name("date-range").text
+
+                                values.append(school)
+                                values.append(degree)
+                                values.append(timeperiod)
+                                print tuple(values)
+                                queryTable(tuple(values))
+                        else:
+                            if education.find_element_by_class_name("item-title"):
+                                values.remove(school)
+                                values.remove(degree)
+                                values.remove(timeperiod)
+                                school = browser.find_elements_by_class_name("item-title").text
+                                values.append(school)
+                                values.append(degree)
+                                values.append(timeperiod)
+                            if education.find_element_by_class_name("item-subtitle"):
+                                values.remove(degree)
+                                values.remove(timeperiod)
+                                degree=education.find_element_by_class_name("item-subtitle").text
+                                values.append(degree)
+                                values.append(timeperiod)
+                            if education.find_element_by_class_name("date-range"):
+                                values.remove(timeperiod)
+                                timeperiod = education.find_element_by_class_name("date-range").text
+                                values.append(timeperiod)
                             queryTable(tuple(values))
-                    else:
-                        if education.find_element_by_class_name("item-title"):
-                            values.remove(school)
-                            values.remove(degree)
-                            values.remove(timeperiod)
-                            school = browser.find_elements_by_class_name("item-title").text
-                            values.append(school)
-                            values.append(degree)
-                            values.append(timeperiod)
-                        if education.find_element_by_class_name("item-subtitle"):
-                            values.remove(degree)
-                            values.remove(timeperiod)
-                            degree=education.find_element_by_class_name("item-subtitle").text
-                            values.append(degree)
-                            values.append(timeperiod)
-                        if education.find_element_by_class_name("date-range"):
-                            values.remove(timeperiod)
-                            timeperiod = education.find_element_by_class_name("date-range").text
-                            values.append(timeperiod)
-                        queryTable(tuple(values))
 
-                writeTofile(browser.page_source)
-            except NoSuchElementException as Noe:
-                if "firstName" in Noe.msg:
-                    print "it's a trap change the id"
+                    writeTofile(browser.page_source)
+                else:
+                    print "its a trap! change now"
                     response = True
                     while response:
                         try:
@@ -305,7 +306,7 @@ def viewBot(browser, pidNumber):
                                 print "linkedin people found us. I am reloading"
                                 newIdentity()
                                 browsers.append(webdriver.Firefox(firefox_profile=FirefoxProfileSettings()))
-                                p = psutil.process(browsers[i].binary.process.pid)
+                                p = psutil.Process(browsers[i].binary.process.pid)
                                 p.terminate
                                 browsers[i].quit()
                                 i = i + 1
@@ -314,14 +315,39 @@ def viewBot(browser, pidNumber):
                                 releaseList(browsers)
                                 newBrowser.get("https://www.linkedin.com/in/jeffweiner08")
                                 gc.collect()
-                                viewBot(newBrowser, result['pid'])
+                                viewBot(newBrowser, result['pid'] + 1)
                             else:
                                 response = False
-                        except NoSuchElementException as elenot:
+
+                        except NoSuchElementException as noele:
                             print "good to go!"
                             response = False
-
-                print 'the stacktace is : (%s)' % Noe
+            except NoSuchElementException as Noe:
+				if "firstName" in Noe.msg:
+					print "it's a trap change the id"
+					response = True
+					while response:
+						try:
+							if browser.find_element_by_class_name("nav-link") or browser.find_element_by_id('session_key-login') or browser.find_element_by_id('first-name'):
+								print "linkedin people found us. I am reloading"
+								newIdentity()
+								browsers.append(webdriver.Firefox(firefox_profile=FirefoxProfileSettings()))
+								p = psutil.Process(browsers[i].binary.process.pid)
+								p.terminate
+								browsers[i].quit()
+								i = i + 1
+								time.sleep(random.uniform(10, 20))
+								newBrowser = browsers[i]
+								releaseList(browsers)
+								newBrowser.get("https://www.linkedin.com/in/jeffweiner08")
+								gc.collect()
+								viewBot(newBrowser, result['pid'])
+							else:
+								response = False
+						except NoSuchElementException as elenot:
+							print "good to go!"
+							response = False
+				print "stacktrace: %s" % Noe
             except StaleElementReferenceException as ele:
                 print "stacktrace is: (%s)" % ele
                 print "I am writing all results to a file"
@@ -342,7 +368,7 @@ def main():
                 time.sleep(random.uniform(10,20))
                 newIdentity()
                 browser.append(webdriver.Firefox(firefox_profile = FirefoxProfileSettings()))
-                p = psutil.process(browser[i].binary.process.pid)
+                p = psutil.Process(browser[i].binary.process.pid)
                 p.terminate
                 browser[i].quit()
                 i = i + 1
@@ -354,7 +380,7 @@ def main():
     newBrowser = browser[i]
     releaseList(browser)
     gc.collect()
-    viewBot(newBrowser, 1478)
+    viewBot(newBrowser, 1792341)
     newBrowser.quit()
 
 if __name__ == "__main__":
