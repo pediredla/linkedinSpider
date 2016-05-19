@@ -1,6 +1,6 @@
 import gc
 import random
-import time, os, signal
+import time
 import unicodedata
 
 import psutil
@@ -36,9 +36,9 @@ def normText(unicodeText):
 
 
 def ConnectDatabase():
-    conn = pymysql.connect(host='********',
-                    user = 'root',
-                    passwd = '******',
+    conn = pymysql.connect(host='XXXXXX',
+                    user = '******',
+                    passwd = '@@@@@@@@@',
                     db='linkedin',
                     charset='utf8mb4',
                     cursorclass=pymysql.cursors.DictCursor)
@@ -83,7 +83,7 @@ def viewBot(browser, pidNumber):
     browsers.append(browser)
     try:
         with conn.cursor() as cursor:
-            cursor.execute('SELECT DISTINCT * FROM `pea` where (pid >%s and pid<=2504278) GROUP BY pid',pidNumber)
+            cursor.execute("SELECT DISTINCT * FROM pea where (pid >"+pidNumber+" and pid<=2504278) GROUP BY pid")
             results = cursor.fetchall()
 
         conn. commit()
@@ -118,7 +118,7 @@ def viewBot(browser, pidNumber):
                         releaseList(browsers)
                         newBrowser.get("https://www.linkedin.com/in/jeffweiner08")
                         gc.collect()
-                        viewBot(newBrowser, result['pid'])
+                        viewBot(newBrowser, str(result['pid']))
                     else:
                         response = False
 
@@ -162,7 +162,7 @@ def viewBot(browser, pidNumber):
                                     releaseList(browsers)
                                     newBrowser.get("https://www.linkedin.com/in/jeffweiner08")
                                     gc.collect()
-                                    viewBot(newBrowser, result['pid'])
+                                    viewBot(newBrowser, str(result['pid']))
                                 else:
                                     response = False
 
@@ -196,7 +196,7 @@ def viewBot(browser, pidNumber):
                                 print "i am writing all to file"
                                 writeTofile(browser.page_source)
                                 browser.get("https://www.linkedin.com/in/jeffweiner08")
-                                viewBot(browser, result['pid']+1)
+                                viewBot(browser, str(result['pid']+1))
                             response = True
                             while response:
                                 try:
@@ -214,7 +214,7 @@ def viewBot(browser, pidNumber):
                                         releaseList(browsers)
                                         newBrowser.get("https://www.linkedin.com/in/jeffweiner08")
                                         gc.collect()
-                                        viewBot(newBrowser, result['pid'])
+                                        viewBot(newBrowser, str(result['pid']))
                                     else:
                                         response = False
 
@@ -315,7 +315,7 @@ def viewBot(browser, pidNumber):
                                 releaseList(browsers)
                                 newBrowser.get("https://www.linkedin.com/in/jeffweiner08")
                                 gc.collect()
-                                viewBot(newBrowser, result['pid'] + 1)
+                                viewBot(newBrowser, str(result['pid'] + 1))
                             else:
                                 response = False
 
@@ -341,7 +341,7 @@ def viewBot(browser, pidNumber):
 								releaseList(browsers)
 								newBrowser.get("https://www.linkedin.com/in/jeffweiner08")
 								gc.collect()
-								viewBot(newBrowser, result['pid'])
+								viewBot(newBrowser, str(result['pid']))
 							else:
 								response = False
 						except NoSuchElementException as elenot:
@@ -380,7 +380,7 @@ def main():
     newBrowser = browser[i]
     releaseList(browser)
     gc.collect()
-    viewBot(newBrowser, 1792341)
+    viewBot(newBrowser, "1794001")
     newBrowser.quit()
 
 if __name__ == "__main__":
