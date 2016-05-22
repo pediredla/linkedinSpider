@@ -18,11 +18,11 @@ def releaseList(a):
     del a
 
 def SendMail(pidNumber):
-    sender = 'linkedinittctest@gmail.com'
-    reciever = ['pediredla.anil@gmail.com']
+    sender = '***********'
+    reciever = ['************']
     message ="""
-              From: Anil Pediredla<linkedinittctest@gmail.com>
-              To: Anil Pediredla<pediredla.anil@gmail.com>
+              From: Anil Pediredla<*******>
+              To: Anil Pediredla<************>
               Subject: Failed Job
 
               From process running at host:<replace with host name> with Tor service<put the tor port here>
@@ -33,7 +33,7 @@ def SendMail(pidNumber):
         smtpObj.ehlo()
         smtpObj.starttls()
         smtpObj.ehlo()
-        smtpObj.login(sender, 'Qazxsw23$')
+        smtpObj.login(sender, '****$$$$')
         smtpObj.sendmail(sender, reciever, message)
         smtpObj.close()
     except SMTPException:
