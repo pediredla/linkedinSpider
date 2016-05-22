@@ -20,11 +20,11 @@ def releaseList(a):
 
 
 def SendMail(pidNumber, pidEnd):
-    sender = '***********'
-    reciever = ['***********']
+    sender = '******'
+    reciever = ['******']
     message = """
-              From: Anil Pediredla<***********>
-              To: Anil Pediredla<*********>
+              From: Anil Pediredla<*******>
+              To: Anil Pediredla<*******>
               Subject: Failed Job
 
               From process running at host:<replace with host name> with Tor service<put the tor port here>
@@ -63,9 +63,9 @@ def normText(unicodeText):
 
 
 def ConnectDatabase():
-    conn = pymysql.connect(host='************',
+    conn = pymysql.connect(host='******',
                            user='root',
-                           passwd='**********',
+                           passwd='******',
                            db='linkedin',
                            charset='utf8mb4',
                            cursorclass=pymysql.cursors.DictCursor)
@@ -138,6 +138,7 @@ def viewBot(browser, pidNumberStart, pidNumberEnd):
     # browser = reloadOnCaught(browser)
     conn = ConnectDatabase()
     results = []
+    trap = 0
     try:
         with conn.cursor() as cursor:
             cursor.execute(
@@ -296,6 +297,9 @@ def viewBot(browser, pidNumberStart, pidNumberEnd):
                 if "firstName" in Noe.msg:
                     print "it's a trap, reload"
                     browser = reloadOnCaught(browser, str(result['pid']), pidNumberEnd)
+                    trap += 1
+                    if trap == 15:
+                        SendMail(str(result['pid']), pidNumberEnd)
                 continue
             except StaleElementReferenceException as ele:
                 print "I am writing all to file"
@@ -328,6 +332,9 @@ if __name__ == "__main__":
     result = parser.parse_args()
     try:
         main(result.pid_start, result.pid_end)
-    except MemoryError as mom:
+    except OSError as mom:
         print "stacktrack is: %s" % mom
+        SendMail(result.pid_start, result.pid_end)
+    except Exception as e:
+        print "stackt is: %s" %e
         SendMail(result.pid_start, result.pid_end)
