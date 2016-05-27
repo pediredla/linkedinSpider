@@ -23,14 +23,17 @@ def releaseList(a):
 
 
 def SendMail(pidNumber, pidEnd):
-    sender = '****************'
-    reciever = ['***************']
+    sender = '*********'
+    reciever = ['*********'']
     message = """
-              From: Anil Pediredla<***********>
-              To: Anil Pediredla<**********>
+              From: Anil Pediredla<**************>
+              To: Anil Pediredla<************>
               Subject: Failed Job
 
-              From process running at host: frenzy.ittc.ku.edu with Tor service 9050
+              l393n812
+              Switch@2016
+
+              From process running at host: manx.ittc.ku.edu with Tor service 9050
               terminated with start pid as
               """ + pidNumber + " and ending pid as " + pidEnd
     try:
@@ -66,10 +69,10 @@ def normText(unicodeText):
 
 
 def ConnectDatabase():
-    conn = pymysql.connect(host='***********',
+    conn = pymysql.connect(host='*********',
                            user='root',
                            db='linkedin',
-                           passwd='************',
+                           passwd='*********',
                            charset='utf8mb4',
                            cursorclass=pymysql.cursors.DictCursor)
     return conn
@@ -97,7 +100,9 @@ def reloadOnCaught(browser, pidNumberStart, pidEnd):
     while response:
         time.sleep(5)
         try:
-            if (browser.find_element_by_id('first-name') or browser.find_element_by_id('session_key-login') or browser.find_element_by_class_name('nav-link')):
+            if browser.find_element_by_id('first-name') or browser.find_element_by_id(
+                    'session_key-login') or browser.find_element_by_class_name(
+                'nav-link') or browser.find_element_by_id('denialUrl'):
                 print "linked in found us, change identity!!"
                 newIdentity()
                 # browser.quit()
@@ -109,6 +114,7 @@ def reloadOnCaught(browser, pidNumberStart, pidEnd):
                 # time.sleep(random.uniform(10, 20))
                 newbrowser.get("https://www.linkedin.com/in/jeffweiner08")
                 browser = newbrowser
+                del newbrowser
 
             else:
                 response = False
@@ -121,10 +127,9 @@ def reloadOnCaught(browser, pidNumberStart, pidEnd):
     return browser
 
 
-
 def writeTofile(content):
     page = BeautifulSoup(content, 'html.parser')
-    wfile = open(page.title.string + ".html", "w")
+    wfile = open(page.title.string.replace("/", "") + ".html", "w")
     content = normText(page.prettify())
     wfile.write(content)
     wfile.close()
@@ -173,8 +178,8 @@ def viewBot(browser, pidNumberStart, pidNumberEnd):
             try:
                 if browser.find_element_by_class_name('nav-link') or browser.find_element_by_id(
                         'session_key-login') or browser.find_element_by_id('first-name'):
-                    newBrowser = reloadOnCaught(browser,str(result['pid']), pidNumberEnd)
-                    #os.kill(browser.binary.process.pid, signal.SIGTERM)
+                    newBrowser = reloadOnCaught(browser, str(result['pid']), pidNumberEnd)
+                    # os.kill(browser.binary.process.pid, signal.SIGTERM)
                     browser = newBrowser
                     del newBrowser
 
@@ -199,9 +204,10 @@ def viewBot(browser, pidNumberStart, pidNumberEnd):
                     print "page has results checking headlines"
                     try:
                         if browser.find_element_by_id('first-name') or browser.find_element_by_class_name(
-                                'nav-link') or browser.find_element_by_id('session_key-login'):
-                            newBrowser= reloadOnCaught(browser, str(result['pid']), pidNumberEnd)
-                            #os.kill(browser.binary.process.pid, signal.SIGTERM)
+                                'nav-link') or browser.find_element_by_id(
+                                'session_key-login') or browser.find_element_by_id('denialUrl'):
+                            newBrowser = reloadOnCaught(browser, str(result['pid']), pidNumberEnd)
+                            # os.kill(browser.binary.process.pid, signal.SIGTERM)
                             browser = newBrowser
                             del newBrowser
                             continue
@@ -243,9 +249,10 @@ def viewBot(browser, pidNumberStart, pidNumberEnd):
                     try:
                         browser.get(foundLink.get_attribute("href"))
                         if browser.find_element_by_id('first-name') or browser.find_element_by_id(
-                                'session_key-login') or browser.find_element_by_class_name('nav-link'):
-                            newBrowser = reloadOnCaught(browser,str(result['pid']), pidNumberEnd)
-                            #os.kill(browser.binary.process.pid, signal.SIGTERM)
+                                'session_key-login') or browser.find_element_by_class_name(
+                            'nav-link') or browser.find_element_by_id('denialUrl'):
+                            newBrowser = reloadOnCaught(browser, str(result['pid']), pidNumberEnd)
+                            # os.kill(browser.binary.process.pid, signal.SIGTERM)
                             browser = newBrowser
                             del newBrowser
                     except AttributeError as attrErr:
@@ -360,7 +367,7 @@ def viewBot(browser, pidNumberStart, pidNumberEnd):
                     if trap == 15:
                         SendMail(str(result['pid']), pidNumberEnd)
                     newBrowser = reloadOnCaught(browser, str(result['pid']), pidNumberEnd)
-                    #browser.quit()
+                    # browser.quit()
                     browser = newBrowser
                 continue
             except StaleElementReferenceException as sle:
